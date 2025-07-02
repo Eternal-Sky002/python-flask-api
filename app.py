@@ -83,6 +83,14 @@ def update_store(store_id):
     ):
         abort(400, message = "Bad Request. 'name' is required")
     
+    # check if another store already has the new name (excluding current store)
+    for existing_store_id, store in stores.items():
+        if(
+            existing_store_id != store_id
+            and store_data["name"] == store["name"]
+        ):
+            abort(400, message = f"Store with name '{store_data['name']}' already exists.")
+    
     try:
         store = stores[store_id]
         # to replace the values of a dictionary, use |=
@@ -95,8 +103,22 @@ def update_store(store_id):
 @app.delete("/stores/<string:store_id>")
 def delete_store(store_id):
     try:
+        # Check if store exists first
+        if store_id not in stores:
+            abort(404, message = "Store not found")
+        
+        # Find and delete all items belonging to this store to maintain data integrity
+        items_to_delete = [item_id for item_id, item in items.items() if item["store_id"] == store_id]
+        for item_id in items_to_delete:
+            del items[item_id]
+        
+        # Now delete the store
         del stores[store_id]
-        return {"message": "Store deleted"}
+        
+        if items_to_delete:
+            return {"message": f"Store deleted along with {len(items_to_delete)} associated items"}
+        else:
+            return {"message": "Store deleted"}
     except KeyError:
         abort(404, message = "Store not found")
 
@@ -117,6 +139,10 @@ def update_item(item_id):
         or "name" not in item_data
     ):
         abort(400, message = "Bad Request. 'price', and 'name' is required")
+    
+    # validate store_id if it's being updated
+    if "store_id" in item_data and item_data["store_id"] not in stores:
+        abort(404, message = "Store not found")
     
     try:
         item = items[item_id]
