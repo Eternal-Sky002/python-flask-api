@@ -12,3 +12,4 @@ class ItemModel(db.Model):
     # memanggil StoreModel karena ada relasi dengan table stores
     # back_populates = "items" adalah nama relasi dari table items
     store = db.relationship("StoreModel", back_populates = "items")
+    tags = db.relationship("TagModel", back_populates = "items", secondary = "items_tags")
