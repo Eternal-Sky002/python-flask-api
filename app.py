@@ -2,6 +2,7 @@ from flask import Flask, jsonify
 from flask_smorest import Api
 from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
+from os import environ
 
 from db import db
 from blocklist import BLOCKLIST
@@ -29,7 +30,7 @@ def create_app(db_url=None):
     migrate = Migrate(app, db)
     api = Api(app)
 
-    app.config["JWT_SECRET_KEY"] = "jose"
+    app.config["JWT_SECRET_KEY"] = environ.get("JWT_SECRET_KEY", "jose")
     jwt = JWTManager(app)
 
     # @jwt.additional_claims_loader
