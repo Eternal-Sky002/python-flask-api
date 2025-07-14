@@ -30,15 +30,39 @@ def create_app(db_url=None):
     migrate = Migrate(app, db)
     api = Api(app)
 
+    # JWT Configuration
     app.config["JWT_SECRET_KEY"] = environ.get("JWT_SECRET_KEY", "jose")
+    app.config["JWT_ACCESS_TOKEN_EXPIRES"] = 3600  # 1 hour
+    app.config["JWT_ERROR_MESSAGE_KEY"] = "message"
     jwt = JWTManager(app)
 
-    # @jwt.additional_claims_loader
-    # def add_claims_to_jwt(identity):
-    #     # TODO: Read from a config file instead of hard-coding
-    #     if identity == 1:
-    #         return {"is_admin": True}
-    #     return {"is_admin": False}
+    @jwt.invalid_token_loader
+    def invalid_token_callback(error):
+        print(f"Invalid token error: {error}")  # Debug log
+        return (
+            jsonify(
+                {
+                    "message": "Signature verification failed.",
+                    "error": "invalid_token",
+                    "details": str(error)
+                }
+            ),
+            401,
+        )
+
+    @jwt.unauthorized_loader
+    def missing_token_callback(error):
+        print(f"Missing token error: {error}")  # Debug log
+        return (
+            jsonify(
+                {
+                    "description": "Request does not contain valid authorization token.",
+                    "error": "authorization_required",
+                    "how_to_fix": "Add 'Authorization: Bearer <token>' header to your request."
+                }
+            ),
+            401,
+        )
 
     @jwt.token_in_blocklist_loader
     def check_if_token_in_blocklist(jwt_header, jwt_payload):
@@ -48,27 +72,6 @@ def create_app(db_url=None):
     def expired_token_callback(jwt_header, jwt_payload):
         return (
             jsonify({"message": "The token has expired.", "error": "token_expired"}),
-            401,
-        )
-
-    @jwt.invalid_token_loader
-    def invalid_token_callback(error):
-        return (
-            jsonify(
-                {"message": "Signature verification failed.", "error": "invalid_token"}
-            ),
-            401,
-        )
-
-    @jwt.unauthorized_loader
-    def missing_token_callback(error):
-        return (
-            jsonify(
-                {
-                    "description": "Request does not contain an access token.",
-                    "error": "authorization_required",
-                }
-            ),
             401,
         )
 
@@ -93,11 +96,7 @@ def create_app(db_url=None):
             401,
         )
 
-    # JWT configuration ends
-
-    with app.app_context():
-        import models  # noqa: F401
-
+    # Register blueprints
     api.register_blueprint(UserBlueprint)
     api.register_blueprint(ItemBlueprint)
     api.register_blueprint(StoreBlueprint)
