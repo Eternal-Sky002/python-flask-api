@@ -2,6 +2,23 @@ services:
     web:
         build: .
         ports:
-            - "5000:5000"
+            - "5000:5050"
         volumes:
             - .:/app
+        depends_on:
+            - db
+        env_file:
+            - ./.env
+    db:
+        image: postgres
+        environment:
+            POSTGRES_USER: python_flask_6mlr_user
+            POSTGRES_PASSWORD: bkPjiZNSEuFGhDHk13X4rx6JGy4rIwFr
+            POSTGRES_DB: python_flask_6mlr
+        ports:
+            - "5432:5432"
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+volumes:
+    postgres_data:
+            
