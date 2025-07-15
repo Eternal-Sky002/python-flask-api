@@ -32,6 +32,11 @@ def create_app(db_url=None):
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     db.init_app(app)
     migrate = Migrate(app, db)
+
+    # Create tables if they don't exist
+    with app.app_context():
+        db.create_all()
+
     api = Api(app)
 
     app.config["JWT_SECRET_KEY"] = "jose"
@@ -96,10 +101,6 @@ def create_app(db_url=None):
             ),
             401,
         )
-
-    @app.before_first_request
-    def create_tables():
-        db.create_all()
 
     api.register_blueprint(ItemBlueprint)
     api.register_blueprint(StoreBlueprint)
