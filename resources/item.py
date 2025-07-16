@@ -13,14 +13,15 @@ blp = Blueprint("items", __name__, description = "Operations on items")
 class Item(MethodView):
     @jwt_required()
     @blp.response(200, ItemSchema)
+    @blp.doc(security=[{"bearerAuth": []}])
     def get(self, item_id):
         item = ItemModel.query.get_or_404(item_id)
         return item
 
     @jwt_required()
     @blp.arguments(ItemUpdateSchema)
-    # the position matters
     @blp.response(200, ItemSchema)
+    @blp.doc(security=[{"bearerAuth": []}])
     def put(self, item_id, item_data):      
         item = ItemModel.query.get_or_404(item_id)
         item.price = item_data["price"]
@@ -32,11 +33,13 @@ class Item(MethodView):
         return item
     
     @jwt_required()
+    @blp.doc(security=[{"bearerAuth": []}])
     def delete(self, item_id):
         item = ItemModel.query.get_or_404(item_id)
         
         db.session.delete(item)
         db.session.commit()
+
         return {"message": "Item deleted"}
         
 @blp.route("/items")

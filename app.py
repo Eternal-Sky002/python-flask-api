@@ -28,6 +28,22 @@ def create_app(db_url=None):
     app.config["OPENAPI_URL_PREFIX"] = "/"
     app.config["OPENAPI_SWAGGER_UI_PATH"] = "/swagger-ui"
     app.config["OPENAPI_SWAGGER_UI_URL"] = "https://cdn.jsdelivr.net/npm/swagger-ui-dist/"
+    app.config["OPENAPI_SWAGGER_UI_CONFIG"] = {
+        "persistAuthorization": True
+    }
+    app.config["API_SPEC_OPTIONS"] = {
+        "security": [{"bearerAuth": []}],
+        "components": {
+            "securitySchemes": {
+                "bearerAuth": {
+                    "type": "http",
+                    "scheme": "bearer",
+                    "bearerFormat": "JWT",
+                    "description": "Enter the token with the `Bearer: ` prefix, e.g. 'Bearer abcde12345'."
+                }
+            }
+        }
+    }
 
     # Fix for Render PostgreSQL database URL
     if db_url and db_url.startswith("postgres://"):

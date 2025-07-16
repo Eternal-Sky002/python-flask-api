@@ -51,9 +51,20 @@ class UserLogin(MethodView):
         abort(401, message="Invalid credentials.")
 
 
+@blp.route("/refresh")
+class TokenRefresh(MethodView):
+    @jwt_required(refresh=True)
+    @blp.doc(security=[{"bearerAuth": []}])
+    def post(self):
+        current_user = get_jwt_identity()
+        new_token = create_access_token(identity=current_user, fresh=False)
+        return {"access_token": new_token}, 200
+
+
 @blp.route("/logout")
 class UserLogout(MethodView):
     @jwt_required()
+    @blp.doc(security=[{"bearerAuth": []}])
     def post(self):
         jti = get_jwt()["jti"]
         BLOCKLIST.add(jti)
@@ -62,32 +73,17 @@ class UserLogout(MethodView):
 
 @blp.route("/user/<int:user_id>")
 class User(MethodView):
-    """
-    This resource can be useful when testing our Flask app.
-    We may not want to expose it to public users, but for the
-    sake of demonstration in this course, it can be useful
-    when we are manipulating data regarding the users.
-    """
-
+    @jwt_required()
     @blp.response(200, UserSchema)
+    @blp.doc(security=[{"bearerAuth": []}])
     def get(self, user_id):
         user = UserModel.query.get_or_404(user_id)
         return user
 
+    @jwt_required()
+    @blp.doc(security=[{"bearerAuth": []}])
     def delete(self, user_id):
         user = UserModel.query.get_or_404(user_id)
         db.session.delete(user)
         db.session.commit()
         return {"message": "User deleted."}, 200
-
-
-@blp.route("/refresh")
-class TokenRefresh(MethodView):
-    @jwt_required(refresh=True)
-    def post(self):
-        current_user = get_jwt_identity()
-        new_token = create_access_token(identity=str(current_user), fresh=False)
-        # Make it clear that when to add the refresh token to the blocklist will depend on the app design
-        jti = get_jwt()["jti"]
-        BLOCKLIST.add(jti)
-        return {"access_token": new_token}, 200
