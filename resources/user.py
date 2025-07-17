@@ -11,7 +11,7 @@ from passlib.hash import pbkdf2_sha256
 
 from db import db
 from models import UserModel
-from schemas import UserSchema
+from schemas import UserSchema, UserLoginSchema
 from blocklist import BLOCKLIST
 
 
@@ -28,6 +28,7 @@ class UserRegister(MethodView):
         user = UserModel(
             username=user_data["username"],
             password=pbkdf2_sha256.hash(user_data["password"]),
+            role=user_data["role"]
         )
         db.session.add(user)
         db.session.commit()
@@ -37,7 +38,7 @@ class UserRegister(MethodView):
 
 @blp.route("/login")
 class UserLogin(MethodView):
-    @blp.arguments(UserSchema)
+    @blp.arguments(UserLoginSchema)
     def post(self, user_data):
         user = UserModel.query.filter(
             UserModel.username == user_data["username"]
@@ -46,7 +47,7 @@ class UserLogin(MethodView):
         if user and pbkdf2_sha256.verify(user_data["password"], user.password):
             access_token = create_access_token(identity=str(user.id), fresh=True)
             refresh_token = create_refresh_token(str(user.id))
-            return {"access_token": access_token, "refresh_token": refresh_token}, 200
+            return {"access_token": access_token, "refresh_token": refresh_token, "role": user.role}, 200
 
         abort(401, message="Invalid credentials.")
 
