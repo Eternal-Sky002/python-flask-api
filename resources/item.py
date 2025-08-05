@@ -3,7 +3,6 @@ from flask_smorest import Blueprint, abort
 from sqlalchemy.exc import SQLAlchemyError
 from flask_jwt_extended import jwt_required, verify_jwt_in_request, get_jwt
 from functools import wraps
-from flask import abort
 
 from schemas import ItemSchema, ItemUpdateSchema
 from models import ItemModel

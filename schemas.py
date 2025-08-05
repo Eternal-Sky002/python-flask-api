@@ -10,6 +10,7 @@ class PlainItemSchema(Schema):
     id = fields.Int(dump_only = True)
     name = fields.Str(required = True)
     price = fields.Float(required = True)
+    qty = fields.Int(required = True)
 
 class PlainTagSchema(Schema):  
     id = fields.Int(dump_only = True)
@@ -51,6 +52,7 @@ class UserLoginSchema(Schema):
 class ItemUpdateSchema(Schema):
     name = fields.Str()
     price = fields.Float()
+    qty = fields.Int()
 
 class StoreUpdateSchema(Schema):
     name = fields.Str()

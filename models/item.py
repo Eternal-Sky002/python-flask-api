@@ -6,8 +6,8 @@ class ItemModel(db.Model):
 
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(80), unique = False, nullable = False)
-    description = db.Column(db.String(255), unique = False, nullable = True)
     price = db.Column(db.Float(precision = 2), unique = False, nullable = False)
+    qty = db.Column(db.Integer, unique = False, nullable = False)
     # relasi dengan table stores dan foreign key dengan kolom id
     store_id = db.Column(db.Integer, db.ForeignKey("stores.id"), unique = False, nullable = False)
     # memanggil StoreModel karena ada relasi dengan table stores

@@ -94,9 +94,11 @@ def create_app(db_url=None):
     @jwt.additional_claims_loader
     def add_claims_to_jwt(identity):
         # Look in the database and see whether the user is an admin
-        if identity == 1:
-            return {"is_admin": True}
-        return {"is_admin": False}
+        from models import UserModel
+        user = UserModel.query.get(identity)
+        if user and user.role == "ROLE_ADMIN":
+            return {"is_admin": True, "role": user.role}
+        return {"is_admin": False, "role": user.role if user else None}
 
     @jwt.expired_token_loader
     def expired_token_callback(jwt_header, jwt_payload):
