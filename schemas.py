@@ -4,6 +4,10 @@ from marshmallow import Schema, fields
 class PlainStoreSchema(Schema):
     id = fields.Int(dump_only = True)
     name = fields.Str(required = True)
+    provinsi = fields.Str(required = True)
+    kabupaten_kota = fields.Str(required = True)
+    kecamatan = fields.Str(required = True)
+    kelurahan = fields.Str(required = True)
 
 class PlainItemSchema(Schema):
     # only used when returning the data
