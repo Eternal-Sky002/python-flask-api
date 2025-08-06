@@ -60,3 +60,7 @@ class ItemUpdateSchema(Schema):
 
 class StoreUpdateSchema(Schema):
     name = fields.Str()
+    provinsi = fields.Str()
+    kabupaten_kota = fields.Str()
+    kecamatan = fields.Str()
+    kelurahan = fields.Str()

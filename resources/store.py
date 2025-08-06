@@ -5,7 +5,7 @@ from flask_jwt_extended import jwt_required
 
 from db import db
 from models import StoreModel
-from schemas import StoreSchema
+from schemas import StoreSchema, StoreUpdateSchema
 
 
 blp = Blueprint("stores", __name__, description="Operations on stores")
@@ -18,6 +18,24 @@ class Store(MethodView):
     @blp.doc(security=[{"bearerAuth": []}])
     def get(self, store_id):
         store = StoreModel.query.get_or_404(store_id)
+        return store
+
+    @jwt_required()
+    @blp.arguments(StoreUpdateSchema)
+    @blp.response(200, StoreSchema)
+    @blp.doc(security=[{"bearerAuth": []}])
+    def put(self, store_data, store_id):      
+        store = StoreModel.query.get_or_404(store_id)
+        store.name = store_data["name"]
+        store.provinsi = store_data["provinsi"]
+        store.kabupaten_kota = store_data["kabupaten_kota"]
+        store.kecamatan = store_data["kecamatan"]
+        store.kelurahan = store_data["kelurahan"]
+
+
+        db.session.add(store)
+        db.session.commit()
+
         return store
 
     @jwt_required()
